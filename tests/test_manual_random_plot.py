@@ -7,8 +7,8 @@ import time
 start = time.time()
 
 # INPUT VARIABLES
-min_point = 3  # minimum number of points in one line to consider, including line ends
-value_range = 25  # how far a random value can be from zero
+min_point = 4  # minimum number of points in one line to consider, including line ends
+value_range = 250  # how far a random value can be from zero
 points_x = [random.randint(-value_range, value_range) for x in range(-value_range, value_range)]
 points_y = [random.randint(-value_range, value_range) for x in range(-value_range, value_range)]
 points = set(zip(points_x, points_y))

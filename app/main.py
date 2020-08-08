@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
-
+import itertools
 import matplotlib.pyplot as plt
+
+
+def lines_from_points(pts) -> set:
+    """Make all possible lines as a set of 2-dimension tuples, in sorted order, with no repeated elements."""
+    return set(itertools.combinations(pts, 2))
 
 
 def point_validation(coords) -> bool:
@@ -41,6 +46,7 @@ def plot(pts, lns, num):
         bool:"""
     pts_len = len(pts)
     plt.title(f"{pts_len} points, N = {num}")
+    plt.grid()
     plt.gca().set_aspect("equal")
     pts_x, pts_y = [list(pt) for pt in zip(*pts)]
     plt.scatter(pts_x, pts_y, c='black')

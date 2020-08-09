@@ -23,7 +23,7 @@ Manage data through this REST API:
   - `app/requirements.txt` — necessary Python libraries
   - `app/runtime.txt` — specifies a Python runtime for Heroku
 - `resources/` — pictures for this README
-- `tests`
+- `tests/`
   - `test_algorithm_auto.py` — a unit test that can be run automatically to assert the correctness of the collinearity check function. It uses hardcoded validation data, which you can see on the plot in the beginning of this README.
   - `test_flask_manual.py` — a manual test for a running Flask application to experiment with API
 

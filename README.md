@@ -16,14 +16,16 @@ Manage data through this REST API:
 
 ## Repo structure ##
 
-- `app/main.py` — the main application script.
-- `app/fucntions.py` — functions used by the main script.
-- `app/Procfile` — lists the process types in an application. Each process type is a declaration of a command that is executed when a container of that process type is started. Used for hosing on Heroku.
-- `app/requirements.txt` — necessary Python libraries
-- `app/runtime.txt` — specifies a Python runtime for Heroku.
-- `resources/*` — pictures for this README.
-- `tests/test_algorithm_auto.py` — a unit test that can be run automatically to assert the correctness of the collinearity check. It uses hardcoded validation data, which are shown on a plot in the beginning of this README.
-- `tests/test_flask_manual.py` — a manual test for a running Flask application to experiment with API.
+- `app/` — source code directory
+  - `main.py` — the main application script
+  - `app/fucntions.py` — functions used by the main script
+  - `app/Procfile` — lists the process types in the app, used for hosing on Heroku
+  - `app/requirements.txt` — necessary Python libraries
+  - `app/runtime.txt` — specifies a Python runtime for Heroku
+- `resources/` — pictures for this README
+- `tests`
+  - `test_algorithm_auto.py` — a unit test that can be run automatically to assert the correctness of the collinearity check function. It uses hardcoded validation data, which you can see on the plot in the beginning of this README.
+  - `test_flask_manual.py` — a manual test for a running Flask application to experiment with API
 
 ## Problem solution
 

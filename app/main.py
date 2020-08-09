@@ -1,69 +1,102 @@
 #!/usr/bin/env python3
-import itertools
+import json
+import io
+
+from flask import Flask, request, Response, abort
+
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
+from functions import lines_from_points, collinear_points, line_filter
 
 
-def lines_from_points(pts) -> set:
-    """Make all possible lines as a set of 2-dimension tuples, in sorted order, with no repeated elements."""
-    return set(itertools.combinations(pts, 2))
+# INPUT VARIABLES
+points = set()  # populated by a user; no duplicate points can exist in the set
+num = int()  # populated by a user; how many collinear points to consider
+points_max_len = 100  # the limit of points in the set to preserve performance
+lines = list()  # contains other lists of collinear points
+
+app = Flask(__name__)
 
 
-def point_validation(coords) -> bool:
-    """Conforms a single point to fit the specified format (x, y)."""
-    return type(coords) == tuple and list(map(type, coords)) == [int, int] and len(coords) == 2
+def to_json(data) -> str:
+    return json.dumps(data)
 
 
-def line_filter(lns, num) -> list:
-    """Returns a list of lines that contain equal of greater amount of points than 'num'."""
-    return list(filter(lambda ln: len(ln) >= num, lns))
+def resp(code, data):
+    return Response(status=code, mimetype="application/json", response=to_json(data))
 
 
-def collinearity(xy, x1y1, x2y2):
-    """This function checks that a given point (x, y) is on a line ((x1, y1), (x2, y2))
-    using the equation of a straight line passing through two given points.
-    Only points inside the line are considered, so
-    if the given point is on one of the line ends, the function returns False.
+@app.route('/point', methods=['POST', 'GET', 'DELETE'])
+def new_point():
+    if request.method == 'POST':
+        try:
+            px = int(request.form['x'])
+            py = int(request.form['y'])
+            if type(px) != int or type(py) != int:
+                return abort(400, "Point coordinates must be integer values.")
+            pt = (px, py)
+            if len(points) < points_max_len:
+                points.add(pt)
+                return resp(200, {"Add new point": pt})
+            else:
+                return resp(304, f"The point was not added. You reached the maximum amount of points: {points_max_len}")
+        except ValueError:
+            return abort(400, "Point coordinates must be integer values.")
+        except UnboundLocalError:
+            return abort(400, "Point coordinates must be integer values.")
+    elif request.method == 'GET':
+        if len(points) == 0:
+            return abort(404, "There are no points. Add some points first.")
+        else:
+            return resp(200, list(points))
+    elif request.method == 'DELETE':
+        points.clear()
+        lines.clear()
+        return resp(200, "All points and lines are deleted.")
 
-    Parameters:
-        xy (tuple): coordinates of the input point (int, int)
-        x1y1 (tuple): coordinates of the first line point (int, int)
-        x2y2 (tuple): coordinates of the second line point (int, int)
-    Returns:
-        bool:"""
 
-    x, y, x1, y1, x2, y2 = xy[0], xy[1], x1y1[0], x1y1[1], x2y2[0], x2y2[1]
-    return (y1 - y2) * x + (x2 - x1) * y + (x1 * y2 - x2 * y1) == 0 and xy not in {x1y1, x2y2}
+@app.route('/lines/<int:n>', methods=['GET'])
+def solution(n):
+    global lines, num
+    if type(n) != int or n < 3:
+        return abort(400, "The number of requested collinear points must be an integer greater than or equal to 3.")
+    elif len(points) == 0:
+        return abort(404, "There are no points. Add some points first.")
+    else:
+        num = n
+        segments = lines_from_points(points)
+        lines = line_filter(collinear_points(points, segments), n)
+        return resp(200, {f"Found {len(lines)} group(s) of collinear points": to_json(lines)})
 
 
-def plot(pts, lns, num):
-    """Put all points and lines on a plot
+@app.route('/plot.png')
+def plot_png():
+    if len(points) == 0:
+        return abort(404, "There are no points to plot. Add some points first.")
+    else:
+        fig = create_figure()
+        output = io.BytesIO()
+        FigureCanvas(fig).print_png(output)
+        return Response(output.getvalue(), mimetype='image/png  ')
 
-    Parameters:
-        pts (set): a set of tuples with the length of 2 containing coordinates of all point (int, int)
-        lns (set): a set of unlimited-length tuples containing collinear points
-        num (int): the minimum number of collinear points to consider
-    Returns:
-        bool:"""
-    pts_len = len(pts)
-    plt.title(f"{pts_len} points, N = {num}")
+
+def create_figure():
+    fig, ax = plt.subplots()
+    plt.title(f"{len(points)} points, N = {num}")
     plt.grid()
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.gca().set_aspect("equal")
-    pts_x, pts_y = [list(pt) for pt in zip(*pts)]
+    pts_x, pts_y = [list(pt) for pt in zip(*points)]
     plt.scatter(pts_x, pts_y, c='black')
-    for ln in lns:
+    for ln in lines:
         lns_pts_x, lns_pts_y = [list(pt) for pt in zip(*ln)]
         plt.plot(lns_pts_x, lns_pts_y)
-    return plt.show()
+    return fig
 
 
-def collinear_points(pts, lns) -> set:
-    selected_lines = list()
-    for seg in lns:
-        col_points = set(seg)
-        for p in pts:
-            if collinearity(p, seg[0], seg[1]):
-                col_points.add(p)
-        if len(col_points) > 2:  # consider only lines with 3 or more points
-            selected_lines.append(col_points)
-    selected_lines = set(frozenset(ln) for ln in selected_lines)  # remove duplicate lines with a different point order
-    return selected_lines
+if __name__ == '__main__':
+    app.debug = True  # enables auto reload during development
+    app.run()

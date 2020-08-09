@@ -28,6 +28,11 @@ def resp(code, data):
     return Response(status=code, mimetype="application/json", response=to_json(data))
 
 
+@app.route('/', methods=['GET'])
+def refer2github():
+    return resp(200, "Refer to the documentation available at https://github.com/y-vasyunin/collinear-points-app")
+
+
 @app.route('/point', methods=['POST', 'GET', 'DELETE'])
 def new_point():
     if request.method == 'POST':

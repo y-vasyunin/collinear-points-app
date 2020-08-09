@@ -3,6 +3,7 @@ import random
 import requests
 
 endpoint = "http://127.0.0.1:5000"
+#endpoint = "https://collinearity-checker.herokuapp.com"
 
 # INPUT DATA
 min_point = 4  # minimum number of points in one line to consider, including line ends

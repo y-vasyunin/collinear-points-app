@@ -7,7 +7,7 @@ Python code in this repo serves for solving a specific problem within a develope
 
 Given a set of feature points in the bidimensional plane, determine every line that contains at least N or more collinear points (point coordinate in integer values).
 
-![Diagrams](resources/testing_plot.png)
+![Diagrams](resources/testing_plot.png | width=300)
 
 Manage data through this REST API:
 

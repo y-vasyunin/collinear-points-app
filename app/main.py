@@ -9,7 +9,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from functions import lines_from_points, collinear_points, line_filter
 
-# INPUT VARIABLES
+
 points = set()  # populated by a user; no duplicate points can exist in the set
 num = int()  # populated by a user; how many collinear points to consider
 points_max_len = 100  # the limit of points in the set to preserve performance
@@ -37,10 +37,9 @@ def new_point():
             pt = (px, py)
             if len(points) < points_max_len:
                 points.add(pt)
-                return jsonify(success=f"Added a new point: {pt}"), 200
+                return jsonify(message=f"Added a new point: {pt}"), 200
             else:
-                return jsonify(
-                    warning=f"A point was not added. You reached {points_max_len}, the maximum amount of points."), 304
+                return jsonify(message=f"A point wasn't added. You already reached {points_max_len} points."), 304
         except (ValueError, UnboundLocalError):
             return abort(400, "Point coordinate must be integer values.")
     elif request.method == 'GET':
@@ -52,7 +51,7 @@ def new_point():
         old_pts = len(points)
         points.clear()
         lines.clear()
-        return jsonify(success=f"{old_pts} points are deleted. You have 0 points now."), 200
+        return jsonify(message=f"{old_pts} points have been deleted. You have 0 points now."), 200
 
 
 @app.route('/lines/<int:n>', methods=['GET'])
@@ -67,7 +66,7 @@ def solution(n):
         segments = lines_from_points(points)
         lines = line_filter(collinear_points(points, segments), n)
         return jsonify(collinear_points=lines,
-                       message=f"Found {len(lines)} group(s) of collinear points within {len(points)} points"), 200
+                       message=f"Found {len(lines)} group(s) of collinear points within {len(points)} points."), 200
 
 
 @app.route('/plot.png')
@@ -83,7 +82,7 @@ def plot_png():
 
 def create_figure():
     fig, ax = plt.subplots()
-    plt.title(f"{len(points)} points, N = {num}")
+    plt.title(f"{len(points)} points, N = {num}, Found {len(lines)} lines")
     plt.grid()
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))

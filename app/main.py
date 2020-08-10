@@ -33,7 +33,7 @@ def new_point():
             px = int(request.form['x'])
             py = int(request.form['y'])
             if type(px) != int or type(py) != int:
-                return abort(400, "Point coordinate must be integer values.")
+                return abort(400, "Point coordinates must be integer values.")
             pt = (px, py)
             if len(points) < points_max_len:
                 points.add(pt)
@@ -41,7 +41,7 @@ def new_point():
             else:
                 return jsonify(message=f"A point wasn't added. You already reached {points_max_len} points."), 304
         except (ValueError, UnboundLocalError):
-            return abort(400, "Point coordinate must be integer values.")
+            return abort(400, "Point coordinates must be integer values.")
     elif request.method == 'GET':
         if len(points) == 0:
             return abort(404, "There are no points. Add some points first: [POST]/point.")

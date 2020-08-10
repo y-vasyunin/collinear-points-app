@@ -15,7 +15,7 @@ def line_filter(lns: list, num: int) -> list:
 
 
 def collinearity(xy: tuple, x1y1: tuple, x2y2: tuple) -> bool:
-    """Check that a given point (x, y) is on a line ((x1, y1), (x2, y2)) using the equation of a straight line
+    """Checks that a given point (x, y) is on a line ((x1, y1), (x2, y2)) using the equation of a straight line
     passing through two given points. Only points inside the line are considered, so if the given point is
     on one of the line ends, the function returns False."""
 
@@ -24,9 +24,11 @@ def collinearity(xy: tuple, x1y1: tuple, x2y2: tuple) -> bool:
 
 
 def collinear_points(pts: set, lns: set) -> list:
+    """Takes two sets, points and lines, and returns a list of all collinear points discovered in the input data."""
+
     selected_lines = list()
-    for seg in lns:
-        col_points = set(seg)
+    for seg in lns:  # TODO: this is the most time-consuming thing in this web application; try to optimize it
+        col_points = set(seg)  # for every line, store available collinear points in this temporary set
         for p in pts:
             if collinearity(p, seg[0], seg[1]):
                 col_points.add(p)
@@ -37,3 +39,10 @@ def collinear_points(pts: set, lns: set) -> list:
     for i in selected_lines:
         solution_lines.append(list(i))
     return solution_lines
+
+
+def bounding_box(ln: list) -> list:
+    """Gets min and max values of x and y point coordinates."""
+
+    lnx, lny = [list(pt) for pt in zip(*ln)]
+    return min(lnx), max(lnx), min(lny), max(lny)

@@ -3,7 +3,7 @@ import random
 import requests
 
 endpoint = "http://127.0.0.1:5000"
-#endpoint = "https://collinearity-checker.herokuapp.com"
+# endpoint = "https://collinearity-checker.herokuapp.com"
 
 # INPUT DATA
 min_point = 4  # minimum number of points in one line to consider, including line ends
@@ -15,7 +15,7 @@ points = zip(points_x, points_y)
 
 # Delete points
 rdel = requests.delete(f"{endpoint}/point")
-print(f"Delete all points: code {rdel.status_code}, {rdel.reason}")
+print(f"Deleted all points: code {rdel.status_code}, {rdel.reason}")
 
 # Add points
 for p in points:

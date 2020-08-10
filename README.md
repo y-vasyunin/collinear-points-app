@@ -2,19 +2,6 @@
 
 > Python code in this repo serves for solving a specific problem within a developer candidate test. It is a Flask-based web application that provides a simple API. Available at [collinearity-checker.herokuapp.com](https://collinearity-checker.herokuapp.com/), licensed under the GPLv3. 
 
-### Repo structure
-
-- **app** — source code directory
-  - [main.py](app/main.py) — the main application script
-  - [fucntions.py](app/fucntions.py) — functions used by the main script
-  - [Procfile](app/Procfile) — lists the process types in the app, used for hosing on Heroku
-  - [requirements.txt](app/requirements.txt) — necessary Python libraries
-  - [runtime.txt](app/runtime.txt) — specifies a Python runtime for Heroku
-- **resources** — pictures for this README
-- **tests**
-  - [test_algorithm_auto.py](tests/test_algorithm_auto.py) — a unit test to run automatically that asserts the correctness of the collinearity check function. It uses hardcoded validation data, which you can see on the plot below
-  - [test_flask_manual.py](tests/test_flask_manual.py) — a manual test for a running Flask application to experiment with API
-
 ## Problem
 
 ### Description
@@ -47,6 +34,19 @@
 ## How do I get set up?
 
 This algorithm is realized in a Flask web application. The point coordinates are stored for the lifetime of the app.
+
+### Repo structure
+
+- **app** — source code directory
+  - [main.py](app/main.py) — the main application script
+  - [fucntions.py](app/fucntions.py) — functions used by the main script
+  - [Procfile](app/Procfile) — lists the process types in the app, used for hosing on Heroku
+  - [requirements.txt](app/requirements.txt) — necessary Python libraries
+  - [runtime.txt](app/runtime.txt) — specifies a Python runtime for Heroku
+- **resources** — pictures for this README
+- **tests**
+  - [test_algorithm_auto.py](tests/test_algorithm_auto.py) — a unit test to run automatically that asserts the correctness of the collinearity check function. It uses hardcoded validation data, which you can see on the plot below
+  - [test_flask_manual.py](tests/test_flask_manual.py) — a manual test for a running Flask application to experiment with API
 
 ### Localhost
 
@@ -87,20 +87,22 @@ This app is deployed on [Heroku](https://www.heroku.com), and it is available at
  
 ## Performance
 
-* Amount of the requested N (collinear points in a segment) doesn't affect the performance.
-* The bottleneck of the app is the collinearity check, which runs as a nested loop, i.e. for every line segment it checks every point. This approach increases computing time exponentially, as shown on a graph below. That is why the maximum amount of 2d points is limited to 100.
+- Amount of the requested N (collinear points in a segment) doesn't affect the performance.
+- The bottleneck of the app is the collinearity check, which runs as a nested loop, i.e. for every line segment it checks every point. This approach increases computing time exponentially, as shown on a graph below. That is why the maximum amount of 2d points is limited to 100.
 
     ![Diagrams](resources/execution_test1.png)
 
     ![Diagrams](resources/execution_test2.png)
 
-One approach to boost the app speed would be to use spatial indices for preliminary filtering of irrelevant points for every segment (before going to the nested loop). It should be possible to implement this solution using [Shapely](https://pypi.org/project/Shapely/). Another way, useful for scaling the application in the cloud, would be to use a PostgreSQL database to store points as Geometry features. Powered by [PostGIS](http://postgis.net) extension, PostgreSQL gives many time-proven tools for spatial relationship analysis.
+- One approach to boost the app speed would be to use spatial indices for preliminary filtering of irrelevant points for every segment (before going to the nested loop). It should be possible to implement this solution using [Shapely](https://pypi.org/project/Shapely/).
+
+- Another way, useful for scaling the application in the cloud, would be to apply a PostgreSQL database to store points as Geometry features. Powered by [PostGIS](http://postgis.net) extension, PostgreSQL gives many time-proven tools for spatial relationship analysis.
 
 ## Task list
 
 - [x] Find an algorithm for the problem
 - [x] Make a web API
-- [ ] Speed up the algorithm (or create a new one solution)
+- [ ] Speed up the algorithm (or create a new solution)
 
 ## Who do I talk to?
 

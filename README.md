@@ -1,30 +1,30 @@
 # COLLINEAR POINTS APP
 
 ## What is this repository for?
-Python code in this repo serves for solving a specific problem within a developer candidate test. It is a Flask-based web application that provides a simple API, licensed under the GPLv3.
+Python code in this repo serves for solving a specific problem within a developer candidate test. It is a Flask-based web application that provides a simple API. Available at [collinearity-checker.herokuapp.com](https://collinearity-checker.herokuapp.com/), licensed under the GPLv3. 
 
 ## Problem description
 
-Given a set of feature points in the bi-dimensional plane, determine every line that contains at least N or more collinear points (point coordinate in integer values).
+1. Given a set of feature points in the bi-dimensional plane, determine every line that contains at least N or more collinear points (point coordinate in integer values).
 
-![Testing plot](resources/testing_plot.png)
+   ![Testing plot](resources/test_plot.png)
 
-Manage data through this REST API:
+2. Manage data through this REST API:
 
-* `[POST]/point` adds a new point in space
-* `[GET]/lines/{n}` gets all lines passing through at least N points (a line segment is a set of collinear points)
+   - `[POST]/point` adds a new point in space
+   - `[GET]/lines/{n}` gets all lines passing through at least N points (a line segment is a set of collinear points)
 
 ## Repo structure ##
 
 - `app/` — source code directory
   - `main.py` — the main application script
-  - `app/fucntions.py` — functions used by the main script
-  - `app/Procfile` — lists the process types in the app, used for hosing on Heroku
-  - `app/requirements.txt` — necessary Python libraries
-  - `app/runtime.txt` — specifies a Python runtime for Heroku
+  - `fucntions.py` — functions used by the main script
+  - `Procfile` — lists the process types in the app, used for hosing on Heroku
+  - `requirements.txt` — necessary Python libraries
+  - `runtime.txt` — specifies a Python runtime for Heroku
 - `resources/` — pictures for this README
 - `tests/`
-  - `test_algorithm_auto.py` — a unit test to run automatically that asserts the correctness of the collinearity check function. It uses hardcoded validation data, which you can see on the plot in the beginning of this README.
+  - `test_algorithm_auto.py` — a unit test to run automatically that asserts the correctness of the collinearity check function. It uses hardcoded validation data, which you can see on the plot below
   - `test_flask_manual.py` — a manual test for a running Flask application to experiment with API
 
 ## Problem solution
@@ -34,54 +34,53 @@ Manage data through this REST API:
 2. For every line, check that a given point `(x, y)`, if it is not already on the line ends, is on that straight line using the following equation:
     ```
     (y1 - y2) * x + (x2 - x1) * y + (x1 * y2 - x2 * y1) == 0
-   ```
+    ```
 3. If the given point `(x, y)` is collinear with the line, add point coordinates to a set of line coordinates.
+
 4. Repeat for all remaining points.
 
-This algorithm is realized in a Flask web application. The point coordinates are stored for the lifetime of the app.
+## Validation dataset
+
+![Validation plot](resources/validation_plot.png)
 
 ## How do I get set up?
 
+This algorithm is realized in a Flask web application. The point coordinates are stored for the lifetime of the app.
+
 ### Localhost
 
-Make sure that the `app` folder is a working directory for the app. Otherwise import statements may not work.
+Make sure that the `app` folder is a working directory for the app.
 
 Run `main.py`. It will start a Flask web app on your `localhost`, port `5000`. By default, bi-dimensional space doesn't have any points in it.
 
-Use the following requests to interact with API. Examples are given for a command-line utility `curl`.
+Use the following requests to interact with API. Examples are given for a command-line utility `curl`:
 
-Add one point (x: -10, y: 15)
+1. Add one point (x: -10, y: 15)
+   ```bash
+   curl -X POST -F "x=-10" -F "y=15" http://127.0.0.1:5000/point
+   ```
 
-```bash
-curl -X POST -F "x=-10" -F "y=15" http://127.0.0.1:5000/point
-```
+2. See all added points:
+   ```bash
+   curl -X GET http://127.0.0.1:5000/point
+   ```
 
-See all added points:
+3. If you try to add more than 100 points, you get a response code `304 Not Modified`, because it is the allowed limit. To clean all your points:
+   ```bash
+   curl -X DELETE http://127.0.0.1:5000/point
+   ```
 
-```bash
-curl -X GET http://127.0.0.1:5000/point
-```
+4. After you filled the space with points, you can estimate which of them are collinear. The following request will return only line segments with five or more collinear points:
+   ```bash
+   curl -X GET http://127.0.0.1:5000/line/5
+   ```
 
-If you try to add more than 100 points, you get a response code `304 Not Modified`, because it is the allowed limit. To clean all your points:
+5. Finally, as you detected the collinear points and line segments, you can plot them in a browser — open this link (every time you run `[GET]/line/{n}`, the plot gets reset, so when you request the plot again, you get the refreshed plot):
+   ```
+   http://127.0.0.1:5000/plot.png
+   ```
 
-```bash
-curl -X DELETE http://127.0.0.1:5000/point
-```
-
-After you filled the space with points, you can estimate which of them are collinear. The following request will return only line segments with five or more collinear points:
-
-```bash
-curl -X GET http://127.0.0.1:5000/line/5
-```
-
-Finally, as you detected the collinear points and line segments, you can plot them in a browser — open this link:
-```
-http://127.0.0.1:5000/plot.png
-```
-
-Every time you run `[GET]/line/{n}`, the plot gets reset. So when you request the plot again, you get the refreshed plot.
-
-### Web
+### Web Application
 
 This app is deployed on [Heroku](https://www.heroku.com), and it is available at [collinearity-checker.herokuapp.com](https://collinearity-checker.herokuapp.com/) instead of `http://127.0.0.1:5000`. Please note that when the app on Heroku doesn't receive any traffic in 1 hour, it goes to sleep. If the sleeping web app receives web traffic, it will become active again after a short delay.
  

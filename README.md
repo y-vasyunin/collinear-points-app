@@ -1,7 +1,6 @@
 # COLLINEAR POINTS APP
 
-## What is this repository for?
-Python code in this repo serves for solving a specific problem within a developer candidate test. It is a Flask-based web application that provides a simple API. Available at [collinearity-checker.herokuapp.com](https://collinearity-checker.herokuapp.com/), licensed under the GPLv3. 
+> Python code in this repo serves for solving a specific problem within a developer candidate test. It is a Flask-based web application that provides a simple API. Available at [collinearity-checker.herokuapp.com](https://collinearity-checker.herokuapp.com/), licensed under the GPLv3. 
 
 ## Problem description
 

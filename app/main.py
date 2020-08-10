@@ -12,7 +12,7 @@ from functions import lines_from_points, collinear_points, line_filter
 
 points = set()  # populated by a user; no duplicate points can exist in the set
 num = int()  # populated by a user; how many collinear points to consider
-points_max_len = 100  # the limit of points in the set to preserve performance
+points_max_len = 500  # the limit of points in the set to preserve performance
 lines = list()  # contains a list of collinear points
 
 app = Flask(__name__)
@@ -51,7 +51,7 @@ def new_point():
         old_pts = len(points)
         points.clear()
         lines.clear()
-        return jsonify(message=f"{old_pts} points have been deleted. You have 0 points now."), 200
+        return jsonify(message=f"{old_pts} point(s) deleted. You have 0 points now."), 200
 
 
 @app.route('/lines/<int:n>', methods=['GET'])
@@ -82,7 +82,7 @@ def plot_png():
 
 def create_figure():
     fig, ax = plt.subplots()
-    plt.title(f"{len(points)} points, N = {num}, Found {len(lines)} lines")
+    plt.title(f"{len(points)} points, {len(lines)} lines found with N = {num}")
     plt.grid()
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))

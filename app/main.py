@@ -12,7 +12,7 @@ from functions import lines_from_points, collinear_points, line_filter
 
 points = set()  # populated by a user; no duplicate points can exist in the set
 num = int()  # populated by a user; how many collinear points to consider
-points_max_len = 500  # the limit of points in the set to preserve performance
+points_max_len = 100  # the limit of points in the set to preserve performance
 lines = list()  # contains a list of collinear points
 
 app = Flask(__name__)

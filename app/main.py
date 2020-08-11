@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import io
 
-from flask import Flask, request, Response, abort, jsonify
+from flask import Flask, request, Response, jsonify, redirect
 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 from functions import lines_from_points, collinear_points, line_filter
 
@@ -14,53 +14,63 @@ points = set()  # populated by a user; no duplicate points can exist in the set
 num = int()  # populated by a user; how many collinear points to consider
 points_max_len = 100  # the limit of points in the set to preserve performance
 lines = list()  # contains a list of collinear points
+api_version = 1
 
 app = Flask(__name__)
 
 
-@app.route('/', methods=['GET'])
+@app.route("/")
+def root():
+    return redirect(f"/v{api_version}")
+
+
+@app.route(f"/v{api_version}", methods=["GET"])
 def summary():
-    return jsonify(
-        name="Collinear Points App", version=0.1, documentation="https://github.com/y-vasyunin/collinear-points-app",
-        description="This API is used to determine every line that contains at least N or more collinear points in the "
-                    "bi-dimensional plane. Refer to the documentation to see available resource URIs."), 200
+    return f"Collinear Points App, version {api_version}. Documentation available at "\
+           f"https://github.com/y-vasyunin/collinear-points-app. "\
+           "This API is used to determine every line that contains at least N or more collinear points in the "\
+           "bi-dimensional plane. Refer to the documentation to see available resource URIs.", 200
 
 
-@app.route('/point', methods=['POST', 'GET', 'DELETE'])
+@app.route(f"/v{api_version}/points", methods=["POST", "GET", "DELETE"])
 def new_point():
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
-            px = int(request.form['x'])
-            py = int(request.form['y'])
+            px = int(request.form["x"])
+            py = int(request.form["y"])
             if type(px) != int or type(py) != int:
-                return abort(400, "Point coordinates must be integer values.")
+                return "Point coordinates must be integer values: x=int&y=int.", 400
             pt = (px, py)
             if len(points) < points_max_len:
                 points.add(pt)
-                return jsonify(message=f"Added a new point: {pt}"), 200
+                return f"Add a new pont: {pt}", 201
             else:
-                return jsonify(message=f"A point wasn't added. You already reached {points_max_len} points."), 304
-        except (ValueError, UnboundLocalError):
-            return abort(400, "Point coordinates must be integer values.")
-    elif request.method == 'GET':
+                return f"A point wasn't added. You already reached {points_max_len} points.", 200
+        except Exception:
+            return "Point coordinates must be integer values: x=int&y=int.", 422
+
+    if request.method == "GET":
         if len(points) == 0:
-            return abort(404, "There are no points. Add some points first: [POST]/point.")
+            return "There are no points. Add some points first: [POST]/points.", 200
         else:
             return jsonify(points=list(points)), 200
-    elif request.method == 'DELETE':
-        old_pts = len(points)
-        points.clear()
-        lines.clear()
-        return jsonify(message=f"{old_pts} point(s) deleted. You have 0 points now."), 200
+    elif request.method == "DELETE":
+        if len(points) > 0:
+            old_pts = len(points)
+            points.clear()
+            lines.clear()
+            return f"All {old_pts} point(s) were deleted.", 200
+        else:
+            return f"There are no points to delete.", 200
 
 
-@app.route('/lines/<int:n>', methods=['GET'])
+@app.route(f"/v{api_version}/lines/<int:n>", methods=["GET"])
 def solution(n):
     global lines, num
     if type(n) != int or n < 3:
-        return abort(400, "The number of requested collinear points must be an integer greater than or equal to 3.")
+        return "The number of requested collinear points must be an integer greater than or equal to 3.", 200
     elif len(points) == 0:
-        return abort(404, "There are no points. Add some points first: [POST]/point.")
+        return "There are no points. Add some points first: [POST]/points.", 200
     else:
         num = n
         segments = lines_from_points(points)
@@ -69,15 +79,15 @@ def solution(n):
                        message=f"Found {len(lines)} group(s) of collinear points within {len(points)} points."), 200
 
 
-@app.route('/plot.png')
+@app.route(f"/v{api_version}/plot")
 def plot_png():
     if len(points) == 0:
-        return abort(404, "There are no points to plot. Add some points first: [POST]/point.")
+        return "There are no points to plot. Add some points first: [POST]/points.", 200
     else:
         fig = create_figure()
         output = io.BytesIO()
-        FigureCanvas(fig).print_png(output)
-        return Response(output.getvalue(), mimetype='image/png')
+        FigureCanvasAgg(fig).print_png(output)
+        return Response(output.getvalue(), mimetype='image/png'), 200
 
 
 def create_figure():

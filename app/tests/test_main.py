@@ -38,7 +38,7 @@ class TestPoints(unittest.TestCase):
 
     def test_point_limit(self):
         lim = space.point_limit
-        self.assertEqual(lim, 150, "Point limit must equal to 100")
+        self.assertEqual(lim, 150, "Point limit must equal to 150")
 
 
 if __name__ == "__main__":

@@ -58,7 +58,7 @@ List all points.
 
 `curl -X GET https://collinearity-checker.herokuapp.com/v1/point`
 
-####`[POST]/points`
+#### `[POST]/points`
 
 Add a new point by providing parameters *x* and *y*. You can't add more than 100 points, because it is the allowed limit (see Performance section below).
 

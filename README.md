@@ -1,6 +1,6 @@
 # COLLINEAR POINTS APP
 
-> Python code in this repo serves for solving a specific problem within a developer candidate test. It is a Flask-based web application that provides a simple API. Available at [collinearity-checker.herokuapp.com](https://collinearity-checker.herokuapp.com/), licensed under the GPLv3. 
+Python code in this repo serves for solving a specific problem within a developer candidate test. It is a Flask-based web application that provides a simple API. Available at [collinearity-checker.herokuapp.com](https://collinearity-checker.herokuapp.com/v1), licensed under the GPLv3. 
 
 ## Problem
 
@@ -13,7 +13,7 @@
 2. Manage data through this REST API:
 
    - `[POST]/point` adds a new point in space
-   - `[GET]/lines/{n}` gets all lines passing through at least N points (a line segment is a set of collinear points)
+   - `[GET]/lines/<n>` gets all lines passing through at least N points (a line segment is a set of collinear points)
 
 ### Solution
 
@@ -33,61 +33,58 @@
 
 ## How do I get set up?
 
-This algorithm is realized in a Flask web application. The point coordinates are stored for the lifetime of the app.
+This algorithm is realized in a Flask web application. Point coordinates are stored inside an object and remain for the lifetime of the app. This app is deployed on [Heroku](https://www.heroku.com), and it is available at [collinearity-checker.herokuapp.com](https://collinearity-checker.herokuapp.com/v1). Please note that when the app on Heroku doesn't receive any traffic in 1 hour, it goes to sleep. If the sleeping web app receives web traffic, it will become active again after a short delay.
+
+For local deployment, make sure that the `app` folder is a working directory for the app. Run `app.py`. It will start a Flask web app on your `localhost`, port `5000`. By default, bi-dimensional space doesn't have any points in it.
 
 ### Repo structure
 
 - **app** — source code directory
-  - [main.py](app/main.py) — the main application script
-  - [fucntions.py](app/fucntions.py) — functions used by the main script
+  - **tests**
+    - [test_api.py](app/tests/test_api.py) — a test to assert the correctness of the responses from API
+    - [test_main.py](app/tests/test_main.py) — a test that asserts the correctness of the Cartesian plane object. It uses hardcoded point data for validation of the collinearity.
+  - [api.py](app/api.py) — Flask api
+  - [main.py](app/main.py) — contains a class used by the API
   - [Procfile](app/Procfile) — lists the process types in the app, used for hosing on Heroku
-  - [requirements.txt](app/requirements.txt) — necessary Python libraries
+  - [requirements.txt](app/requirements.txt) — necessary Python dependencies
   - [runtime.txt](app/runtime.txt) — specifies a Python runtime for Heroku
-- **resources** — pictures for this README
-- **tests**
-  - [test_algorithm_auto.py](tests/test_algorithm_auto.py) — a unit test to run automatically that asserts the correctness of the collinearity check function. It uses hardcoded validation data
-  - [test_flask_manual.py](tests/test_flask_manual.py) — a manual test for a running Flask application to experiment with API
+- **resources** — pictures for this README.md
 
-### Localhost
+## API
 
-Make sure that the `app` folder is a working directory for the app.
+#### `[GET]/points`
 
-Run `main.py`. It will start a Flask web app on your `localhost`, port `5000`. By default, bi-dimensional space doesn't have any points in it.
+List all points.
 
-Use the following requests to interact with API. Examples are given for a command-line utility `curl`:
+`curl -X GET https://collinearity-checker.herokuapp.com/v1/point`
 
-1. Add one point (x: -10, y: 15)
-   ```bash
-   curl -X POST -F "x=-10" -F "y=15" http://127.0.0.1:5000/point
-   ```
+####`[POST]/points`
 
-2. See all added points:
-   ```bash
-   curl -X GET http://127.0.0.1:5000/point
-   ```
+Add a new point by providing parameters *x* and *y*. You can't add more than 100 points, because it is the allowed limit (see Performance section below).
 
-3. If you try to add more than 100 points, you get a response code `304 Not Modified`, because it is the allowed limit. To clean all your points:
-   ```bash
-   curl -X DELETE http://127.0.0.1:5000/point
-   ```
+`curl -X POST -F "x=-10" -F "y=15" https://collinearity-checker.herokuapp.com/v1/point`
 
-4. After you filled the space with points, you can estimate which of them are collinear. The following request will return only line segments with five or more collinear points:
-   ```bash
-   curl -X GET http://127.0.0.1:5000/line/5
-   ```
+#### `[DELETE]/points` 
 
-5. Finally, as you detected the collinear points and line segments, you can plot them in a browser — open this link (every time you run `[GET]/line/{n}`, the plot gets reset, so when you request the plot again, you get the refreshed plot):
-   ```
-   http://127.0.0.1:5000/plot.png
-   ```
+Delete all points.
 
-### Web Application
+`curl -X DELETE https://collinearity-checker.herokuapp.com/v1/point`
 
-This app is deployed on [Heroku](https://www.heroku.com), and it is available at [collinearity-checker.herokuapp.com](https://collinearity-checker.herokuapp.com/) instead of `http://127.0.0.1:5000`. Please note that when the app on Heroku doesn't receive any traffic in 1 hour, it goes to sleep. If the sleeping web app receives web traffic, it will become active again after a short delay.
+#### `[GET]/lines/<n>` 
+
+List all groups of collinear points. The minimum allowed number of points in a group `<n>` that you provide at the end of URL is 3.
+
+`curl -X GET https://collinearity-checker.herokuapp.com/v1/line/5`
+
+#### `[GET]/plot`
+
+Show a plot with points and lines. You can plot them in a browser — open this link:
+
+`https://collinearity-checker.herokuapp.com/v1/plot`
  
 ## Performance
 
-- Amount of the requested N (collinear points in a segment) doesn't affect the performance.
+- The requested amount of N, collinear points in a segment, doesn't affect the performance.
 - The bottleneck of the app is the collinearity check, which runs as a nested loop, i.e. for every line segment it checks every point. This approach increases computing time exponentially, as shown on a graph below. That is why the maximum amount of 2d points is limited to 100.
 
     ![Diagrams](resources/execution_test1.png)
@@ -97,12 +94,6 @@ This app is deployed on [Heroku](https://www.heroku.com), and it is available at
 - One approach to boost the app speed would be to use spatial indices for preliminary filtering of irrelevant points for every segment (before going to the nested loop). It should be possible to implement this solution using [Shapely](https://pypi.org/project/Shapely/).
 
 - Another way, useful for scaling the application in the cloud, would be to apply a PostgreSQL database to store points as Geometry features. Powered by [PostGIS](http://postgis.net) extension, PostgreSQL gives many time-proven tools for spatial relationship analysis.
-
-## Task list
-
-- [x] Find an algorithm for the problem
-- [x] Make a web API
-- [ ] Speed up the algorithm (or create a new solution)
 
 ## Who do I talk to?
 

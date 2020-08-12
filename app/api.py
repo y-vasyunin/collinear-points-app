@@ -30,6 +30,7 @@ def summary():
 
 @app.route(f"/v{api_version}/points", methods=["POST", "GET", "DELETE"])
 def new_point():
+    global space
     if request.method == "POST":
         try:
             px = int(request.form["x"])
@@ -47,6 +48,7 @@ def new_point():
             return "There are no points. Add some points first: [POST]/points.", 200
         else:
             return jsonify(points=list(space.points)), 200
+
     elif request.method == "DELETE":
         if len(space.points) > 0:
             old_pts = len(space.points)
@@ -58,7 +60,7 @@ def new_point():
 
 @app.route(f"/v{api_version}/lines/<int:n>", methods=["GET"])
 def solution(n):
-    global num
+    global num, space
     if type(n) != int or n < 3:
         return "The number of requested collinear points must be an integer greater than or equal to 3.", 200
     elif len(space.points) == 0:
@@ -83,6 +85,7 @@ def plot_png():
 
 
 def create_figure():
+    global num, space
     fig, ax = plt.subplots()
     plt.title(f"{len(space.points)} points, {len(space.lines)} lines found with N = {num}")
     plt.grid()
@@ -98,5 +101,5 @@ def create_figure():
 
 
 if __name__ == '__main__':
-    app.debug = True  # enables auto reload during development
+    app.debug = False  # enables auto reload during development
     app.run()

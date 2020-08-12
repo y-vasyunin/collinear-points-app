@@ -65,6 +65,7 @@ class CartesianPlane:
                     selected_lines.append(col_points)
             selected_lines = set(
                 frozenset(ln) for ln in line_filter(selected_lines, num))  # remove duplicate lines with a different point order
+            self.lines.clear()
             for i in selected_lines:
                 self.lines.append(list(i))
             return f"Found {len(self.lines)} group(s) of collinear points"

@@ -62,7 +62,7 @@ List all points.
 
 Add a new point by providing parameters *x* and *y*. You can't add more than 100 points, because it is the allowed limit (see Performance section below).
 
-`curl -X POST -F "x=-10" -F "y=15" https://collinearity-checker.herokuapp.com/v1/point`
+`curl -X POST -F "x=-10" -F "y=15" https://collinearity-checker.herokuapp.com/v1/points`
 
 #### `[DELETE]/points` 
 
